@@ -1,2 +1,2 @@
 # Game-Of-Life
-Java developed Conway's game of life engine Game of Life
+Java developed Conway's Game of Life engine
