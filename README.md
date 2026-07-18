@@ -1,2 +1,3 @@
-# Game-Of-Life
-Java developed Conway's Game of Life engine
+Projects
+- Java developed market simulator
+- Java developed Conway's Game of Life engine
