@@ -1,4 +1,4 @@
-//converts text into words, prepares the words for processing
+//converts text into words, prepares the words for processing, when the words are processed they can be used by other functions
 
 
 //methods:
