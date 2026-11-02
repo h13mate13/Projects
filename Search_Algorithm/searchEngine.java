@@ -15,6 +15,7 @@ public class SearchEngine {
     private SearchIndex searchIndex;
     private TextProcessor textProcessor;
 
+    //constructor
     public SearchEngine(
             SearchIndex searchIndex,
             TextProcessor textProcessor) {
@@ -23,16 +24,17 @@ public class SearchEngine {
         this.textProcessor = textProcessor;
     }
 
+
     public List<SearchResult> search(String query, int limit) {
 
         List<SearchResult> results = new ArrayList<>();
 
-        // A limit of zero or less means return no results
+        // if there is a limit of zero or less means it returns no results
         if (limit <= 0) {
             return results;
         }
 
-        // Prepare the query in the same way as the documents
+        // Prepare the query(list) using textProcessor and tokenizing the query input variable
         List<String> queryTokens =
                 textProcessor.tokenize(query);
 
@@ -40,7 +42,7 @@ public class SearchEngine {
         double[] queryVector =
                 searchIndex.vectorize(queryTokens);
 
-        // Compare the query with every document
+        // Compare the query(list) with every document
         for (int documentId = 0;
              documentId < searchIndex.getDocumentCount();
              documentId++) {
@@ -61,6 +63,9 @@ public class SearchEngine {
         }
 
         // Sort from highest score to lowest score
+        //comparator uses the comparing double function to sort through each SearchResult
+        //and compares it by the number returned by it's getScore()
+        //.reversed displays the highest score first and then the smallest in the last
         results.sort(
                 Comparator.comparingDouble(SearchResult::getScore)
                         .reversed()
