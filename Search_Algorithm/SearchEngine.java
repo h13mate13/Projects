@@ -1,4 +1,5 @@
 //scores and ranks the documents, is actually doing the predicting part
+//math part of the project
 
 //Methods:
 //search(String query, int limit)	Tokenizes and vectorizes the query, scores every document, sorts results, and returns up to limit matches.	List<SearchResult>

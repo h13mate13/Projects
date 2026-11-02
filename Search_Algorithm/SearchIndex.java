@@ -1,4 +1,5 @@
 //builds the vocabulary and data(files) matrix, prepares searchable data
+//math part of the project
 
 //methods:
 //buildIndex(List(String)[of documents])    builds the vocab, builds the matrix, stores the resulting data.     returns void
