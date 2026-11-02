@@ -8,7 +8,6 @@
 //getDocumentVector(int documentId)	Extracts a document’s column from the matrix.	double[]
 //getDocumentText(int documentId)	Retrieves the original document text.	String
 //getDocumentCount()	Reports how many documents are indexed.	int
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -16,58 +15,132 @@ import java.util.Map;
 
 public class SearchIndex {
 
-    // Fields
     private List<String> documents;
     private Map<String, Integer> vocabulary;
     private double[][] documentMatrix;
     private TextProcessor textProcessor;
 
-    // Constructor
     public SearchIndex() {
-        // Initialize the fields
+        documents = new ArrayList<>();
+        vocabulary = new LinkedHashMap<>();
+        documentMatrix = new double[0][0];
+        textProcessor = new TextProcessor();
     }
 
-    // Coordinates the complete indexing process
-    public void buildIndex(List<String> documents) {
-        // Store documents, tokenize them,
-        // build vocabulary, and build matrix
+    // Prepare all the documents for searching
+    public void buildIndex(List<String> inputDocuments) {
+
+        // Store a copy of the documents
+        documents = new ArrayList<>();
+
+        for (int i = 0; i < inputDocuments.size(); i++) {
+            documents.add(inputDocuments.get(i));
+        }
+
+        // Each document gets its own list of words
+        List<List<String>> allWords = new ArrayList<>();
+
+        for (int i = 0; i < documents.size(); i++) {
+            String text = documents.get(i);
+            List<String> words = textProcessor.tokenize(text);
+
+            allWords.add(words);
+        }
+
+        vocabulary = buildVocabulary(allWords);
+        documentMatrix = buildDocumentMatrix(allWords);
     }
 
-    // Assigns an index to every unique word
+    // Give each unique word a number
     public Map<String, Integer> buildVocabulary(
-            List<List<String>> tokenizedDocuments) {
-        // Build and return vocabulary
+            List<List<String>> allWords) {
+
+        Map<String, Integer> wordPositions = new LinkedHashMap<>();
+        int nextPosition = 0;
+
+        for (int i = 0; i < allWords.size(); i++) {
+            List<String> words = allWords.get(i);
+
+            for (int j = 0; j < words.size(); j++) {
+                String word = words.get(j);
+
+                // Only add a word if we have not seen it before
+                if (!wordPositions.containsKey(word)) {
+                    wordPositions.put(word, nextPosition);
+                    nextPosition++;
+                }
+            }
+        }
+
+        return wordPositions;
     }
 
-    // Turns tokens into a word-count vector
-    public double[] vectorize(List<String> tokens) {
-        // Build and return vector
+    // Count how many times each vocabulary word appears
+    public double[] vectorize(List<String> words) {
+
+        double[] counts = new double[vocabulary.size()];
+
+        for (int i = 0; i < words.size(); i++) {
+            String word = words.get(i);
+
+            if (vocabulary.containsKey(word)) {
+                int position = vocabulary.get(word);
+                counts[position] = counts[position] + 1;
+            }
+        }
+
+        return counts;
     }
 
-    // Places document vectors into matrix columns
+    // Rows represent words; columns represent documents
     public double[][] buildDocumentMatrix(
-            List<List<String>> tokenizedDocuments) {
-        // Build and return matrix
+            List<List<String>> allWords) {
+
+        int rows = vocabulary.size();
+        int columns = allWords.size();
+
+        double[][] matrix = new double[rows][columns];
+
+        for (int column = 0; column < columns; column++) {
+            List<String> words = allWords.get(column);
+            double[] counts = vectorize(words);
+
+            for (int row = 0; row < rows; row++) {
+                matrix[row][column] = counts[row];
+            }
+        }
+
+        return matrix;
     }
 
-    // Retrieves one matrix column
+    // Copy one document's column into an array
     public double[] getDocumentVector(int documentId) {
-        // Extract and return document vector
+
+        checkDocumentId(documentId);
+
+        double[] counts = new double[vocabulary.size()];
+
+        for (int row = 0; row < vocabulary.size(); row++) {
+            counts[row] = documentMatrix[row][documentId];
+        }
+
+        return counts;
     }
 
-    // Retrieves the original document
+    // Return the original document text
     public String getDocumentText(int documentId) {
         checkDocumentId(documentId);
         return documents.get(documentId);
     }
 
-    // Reports the number of indexed documents
+    // Return the number of documents
     public int getDocumentCount() {
         return documents.size();
     }
 
-    // Checks whether the document ID exists
+    // Check that the requested document exists
     private void checkDocumentId(int documentId) {
+
         if (documentId < 0 || documentId >= documents.size()) {
             throw new IndexOutOfBoundsException(
                     "Invalid document ID: " + documentId
