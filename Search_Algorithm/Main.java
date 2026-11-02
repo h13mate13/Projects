@@ -46,21 +46,25 @@ public class Main {
 
     public static void main(String[] args) {
 
-        // Create some sample documents
+        // Create some sample documents, for the data stored
         List<String> documents = createSampleDocuments();
 
-        // Prepare the vocabulary and document matrix
+        // Prepare the vocabulary and document matrix, by creating new searchIndex for
+        // searching the already made sample documents to search through
         SearchIndex index = new SearchIndex();
+
+        //uses the sample documents to build an index
         index.buildIndex(documents);
 
-        // Create the objects needed to search
+        // Create the objects needed to search, text processor and and
+        // a search engine for dynamically ranking the documents based on your searches
         TextProcessor processor = new TextProcessor();
         SearchEngine engine = new SearchEngine(index, processor);
 
-        // Read what the user types in the console
+        // Read what the user types in the console, prompt the user for the document
         Scanner scanner = new Scanner(System.in);
 
-        System.out.println("Document Search Engine");
+        System.out.println("Search Engine");
         System.out.println("Documents loaded: " + index.getDocumentCount());
         System.out.println("Type a search query, or type exit to quit.");
 
@@ -70,36 +74,46 @@ public class Main {
 
             System.out.print("\nSearch: ");
 
-            // Stop if the console input has ended
+            // Stop if the console input has ended, ends if the user enters and creates a new line
             if (!scanner.hasNextLine()) {
                 break;
             }
 
+            //trims the whitespaces and bypasses the empty nextLine in the input box
+            //using nextLine() creates a nextLine() buffer in the input box, need to use another
+            //nextLine() to clear the contents of the input box
             String query = scanner.nextLine().trim();
 
+            //if user enters exit it ends the loop
             if (query.equalsIgnoreCase("exit")) {
                 running = false;
 
+                //if empty it prompts the user to enter a searching term and loops again
             } else if (query.isEmpty()) {
                 System.out.println("Please enter a search term.");
 
             } else {
+                // if entered a result, the user is given their query using
+                //the search func that gives the user their query document
                 // Return up to three matching documents
                 List<SearchResult> results = engine.search(query, 3);
 
+                //displays the result using the result and the index of the result
                 displayResults(results, index);
             }
         }
 
         scanner.close();
-        System.out.println("Search engine closed.");
+        System.out.println("End of Search.");
     }
 
     // Supply sample text before we add file loading
     public static List<String> createSampleDocuments() {
 
+        //documents sample data list
         List<String> documents = new ArrayList<>();
 
+        //prompt documents
         documents.add("Linear algebra uses matrices and vectors.");
         documents.add("Graphs contain vertices and edges.");
         documents.add("A search engine uses vectors to rank documents.");
@@ -109,25 +123,38 @@ public class Main {
         return documents;
     }
 
-    // Show the matching documents in their ranked order
+    // Show the matching documents in their ranked order, the actual math is done by searchengine.java
+    // this only displays the results
     public static void displayResults(
+            //creates a list of searchresult class to input the results
+            // inputs an index of searchIndex class
             List<SearchResult> results, SearchIndex index) {
 
+        //if should only return empty because of what? ********
         if (results.isEmpty()) {
             System.out.println("No matches found.");
             return;
         }
 
+
         System.out.println("\nMatching documents:");
 
+        //uses a simple for loop to display the search results this is O(n) which is terrible
         for (int i = 0; i < results.size(); i++) {
 
             // Get one search result
+            //prints out results just by going through the list one at a time
             SearchResult result = results.get(i);
 
+            // uses an id to return the original text of the document needs an ID so this must be private, this is like a key
             // Use its ID to retrieve the original text
             int documentId = result.getDocumentId();
+
+            //what happens when an incorrect id is entered? **********
             String text = index.getDocumentText(documentId);
+
+            //the computing for the score is done in getscore in the search result class
+            //should be moved to searchengine class? ************
             double score = result.getScore();
 
             // Display ranks starting at 1
